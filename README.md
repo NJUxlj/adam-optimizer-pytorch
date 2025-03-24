@@ -1,6 +1,8 @@
 # Adam-optimizer-pytorch
 reproduce Adam with pytorch
 
+- We have implemented `Adam`, `AdamW`, `Adafactor` optimizers in this project. You can check the running result in the `examples` folder.
+
 
 
 ## Adam
