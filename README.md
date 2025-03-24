@@ -3,11 +3,13 @@ reproduce Adam with pytorch
 
 - We have implemented `Adam`, `AdamW`, `Adafactor` optimizers in this project. You can check the running result in the `examples` folder.
 
+- we implemented an `OptimizerMonitor` in the `utils.py` file, which can monitor the training process of the model, the GPU memory occupation of the first and second momentum, the gradient and weights and other variables. We also record the gradient growing tendency using the matplotlib. 
 
 
 ## Adam
 
-Adam（Adaptive Moment Estimation）优化器结合了动量法和自适应学习率的优点，是当前大模型训练中最常用的优化器之一.
+Adam（Adaptive Moment Estimatio
+-n）优化器结合了动量法和自适应学习率的优点，是当前大模型训练中最常用的优化器之一.
 
 ![image](https://github.com/user-attachments/assets/6b5e2a92-a0b2-4c15-83f6-8eb5a62fefe5)
 
@@ -186,3 +188,36 @@ v_t = β2*v_{t-1} + (1-β2)*g_t²
 - 超大规模集群：LAMB + ZeRO-3并行
 
 这些优化器在Hugging Face生态中均有现成实现，可通过`transformers.Trainer`直接调用。最新的优化趋势是结合二阶优化方法和量化技术，如Sophia优化器在LLaMA-2训练中已展现出显著优势。
+
+
+
+
+## How to Run?
+```bash
+python adam.py   
+
+python utils.py  # monitor the training process
+```
+
+
+
+
+
+## Running Results
+
+- Adam
+![Adam](examples/adam.png)
+
+
+- AdamW
+![AdamW](examples/adam_w.png)
+
+
+
+- Adafactor
+![Adafactor](examples/adafactor.png)
+
+
+
+- Optimizer Monitoring
+![monitor](examples\optimizer_trends.png)

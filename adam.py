@@ -32,7 +32,7 @@ class AdamOptimizer:
 # 测试用例（最小化 f(x) = x^4 + 3x^3 + 2）
 if __name__ == "__main__":
     # 初始化参数和优化器
-    x = np.array([3.0], dtype=np.float32)
+    x = np.array([3.0], dtype=np.float32) # Weights
     adam = AdamOptimizer(x, lr=0.1)
     
     # 训练循环
