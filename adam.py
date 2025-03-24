@@ -7,18 +7,21 @@ import random
 
 class AdamOptimizer:
     def __init__(self, params, lr=0.001, beta1=0.9, beta2=0.999, epsilon=1e-8):
-        self.params = params
+        self.params = params  # Weights
         self.lr = lr
         self.beta1 = beta1
         self.beta2 = beta2
         self.epsilon = epsilon
-        self.m = np.zeros_like(params)
-        self.v = np.zeros_like(params)
-        self.t = 0
+        self.m = np.zeros_like(params)  # 一阶动量
+        self.v = np.zeros_like(params)  # 二阶动量
+        self.t = 0  # time step
+        self.t = 0  # time step
 
     def step(self, grads):
         self.t += 1
-        self.m = self.beta1 * self.m + (1 - self.beta1) * grads
+        # 历史上的梯度 + 当前梯度
+        self.m = self.beta1 * self.m + (1 - self.beta1) * grads   
+        
         self.v = self.beta2 * self.v + (1 - self.beta2) * (grads ** 2)
         
         # 偏差校正
