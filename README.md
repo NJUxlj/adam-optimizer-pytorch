@@ -7,6 +7,8 @@ reproduce Adam with pytorch
 
 Adam（Adaptive Moment Estimation）优化器结合了动量法和自适应学习率的优点，是当前大模型训练中最常用的优化器之一.
 
+![image](https://github.com/user-attachments/assets/6b5e2a92-a0b2-4c15-83f6-8eb5a62fefe5)
+
 ---
 
 ### **1. 核心机制**
