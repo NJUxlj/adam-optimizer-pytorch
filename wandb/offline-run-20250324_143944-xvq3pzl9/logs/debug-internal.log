@@ -1,0 +1,14 @@
+{"time":"2025-03-24T14:39:45.5566894+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.4","symlink path":"D:\\ai-code\\adam-optimizer-pytorch\\wandb\\offline-run-20250324_143944-xvq3pzl9\\logs\\debug-core.log"}
+{"time":"2025-03-24T14:39:46.4700156+08:00","level":"INFO","msg":"created new stream","id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:46.4700156+08:00","level":"INFO","msg":"stream: started","id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:46.4700156+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:46.4706413+08:00","level":"INFO","msg":"sender: started","stream_id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:46.4700156+08:00","level":"INFO","msg":"handler: started","stream_id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:46.5087143+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-03-24T14:39:47.9146374+08:00","level":"INFO","msg":"stream: closing","id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:47.9151505+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-03-24T14:39:47.917041+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-03-24T14:39:47.9178161+08:00","level":"INFO","msg":"handler: closed","stream_id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:47.9178161+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:47.9178161+08:00","level":"INFO","msg":"sender: closed","stream_id":"xvq3pzl9"}
+{"time":"2025-03-24T14:39:47.918689+08:00","level":"INFO","msg":"stream: closed","id":"xvq3pzl9"}

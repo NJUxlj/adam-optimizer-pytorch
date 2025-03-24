@@ -1,0 +1,14 @@
+{"time":"2025-03-24T15:19:28.9149283+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.4","symlink path":"D:\\ai-code\\adam-optimizer-pytorch\\wandb\\offline-run-20250324_151928-pke7yunp\\logs\\debug-core.log"}
+{"time":"2025-03-24T15:19:29.1391063+08:00","level":"INFO","msg":"created new stream","id":"pke7yunp"}
+{"time":"2025-03-24T15:19:29.1394586+08:00","level":"INFO","msg":"stream: started","id":"pke7yunp"}
+{"time":"2025-03-24T15:19:29.1394586+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"pke7yunp"}
+{"time":"2025-03-24T15:19:29.1397595+08:00","level":"INFO","msg":"handler: started","stream_id":"pke7yunp"}
+{"time":"2025-03-24T15:19:29.1397595+08:00","level":"INFO","msg":"sender: started","stream_id":"pke7yunp"}
+{"time":"2025-03-24T15:19:29.1466156+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-03-24T15:19:30.2386776+08:00","level":"INFO","msg":"stream: closing","id":"pke7yunp"}
+{"time":"2025-03-24T15:19:30.2386776+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-03-24T15:19:30.2410556+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-03-24T15:19:30.2416496+08:00","level":"INFO","msg":"handler: closed","stream_id":"pke7yunp"}
+{"time":"2025-03-24T15:19:30.2416496+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"pke7yunp"}
+{"time":"2025-03-24T15:19:30.2416496+08:00","level":"INFO","msg":"sender: closed","stream_id":"pke7yunp"}
+{"time":"2025-03-24T15:19:30.2429878+08:00","level":"INFO","msg":"stream: closed","id":"pke7yunp"}

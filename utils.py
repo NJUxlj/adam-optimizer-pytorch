@@ -5,6 +5,13 @@ import matplotlib.pyplot as plt
 from sys import getsizeof  
 import gc  
 import torch  
+import torch.nn as nn
+from collections import defaultdict  
+from typing import Dict, List  
+
+from models import TestModel, TestModelForCausalLM
+
+from load import get_qa_dataloader, QADataset, get_qa_dataset
 
 class OptimizerMonitor:  
     def __init__(self, model=None, optimizer=None):  
@@ -144,9 +151,233 @@ class OptimizerMonitor:
             report.append(f"- Total Model: {self.history[-1]['mem_usage']['model_total']/1e6:.2f} MB")  
         
         return "\n".join(report)  
+    
+    
+    
+    
+    
+class TorchOptimizerMonitor:  
+    def __init__(self, model: torch.nn.Module, optimizer: torch.optim.Optimizer):  
+        self.model = model  
+        self.optimizer = optimizer  
+        self.history = []  
+        self.start_time = time.time()  
+        
+        # 初始化CUDA内存基准  
+        self._init_memory_stats()  
+        
+        # 注册梯度钩子  
+        self.gradient_norms = defaultdict(list)  
+        self._register_hooks()  
 
- 
-if __name__ == "__main__":  
+    def _init_memory_stats(self):  
+        """初始化显存统计基准"""  
+        torch.cuda.reset_peak_memory_stats()  
+        self.base_mem = torch.cuda.memory_allocated()  
+        self.optimizer_mem = 0  
+        
+    def _register_hooks(self):  
+        """为模型参数注册梯度钩子"""  
+        for name, param in self.model.named_parameters():  
+            if param.requires_grad:  
+                param.register_hook(  
+                    lambda grad, name=name: self._gradient_hook(grad, name)  
+                )  
+
+    def _gradient_hook(self, grad: torch.Tensor, param_name: str):  
+        """梯度钩子记录梯度统计"""  
+        if grad is not None:  
+            self.gradient_norms[param_name].append(grad.norm().item())  
+
+    def _get_optimizer_states_mem(self) -> Dict[str, int]:  
+        """计算优化器状态内存用量"""  
+        state_mem = {}  
+        for state in self.optimizer.state.values():  
+            # 每个参数的状态字典可能包含多个变量（如Adam优化器中的一阶动量m和二阶动量v）
+            for k, v in state.items():  
+                if isinstance(v, torch.Tensor): 
+                    # 累加相同状态名的内存用量 
+                    state_mem[k] = state_mem.get(k, 0) + v.element_size() * v.nelement()  
+        return state_mem  
+
+    def record(self, loss: torch.Tensor = None):  
+        """记录当前训练状态"""  
+        torch.cuda.synchronize()  
+        record = {  
+            "timestamp": time.time() - self.start_time,  
+            "step": len(self.history) + 1,  
+            "loss": loss.item() if loss else None,  
+            "learning_rate": self._get_current_lr(),  
+            "memory": self._get_memory_stats(),  
+            "grad_stats": self._get_grad_stats(),  
+            "optimizer_states": self._get_optimizer_states_mem()  
+        }  
+        self.history.append(record)  
+        return record  
+
+    def _get_current_lr(self) -> float:  
+        """获取当前学习率"""  
+        return self.optimizer.param_groups[0]['lr']  
+
+    def _get_memory_stats(self) -> Dict[str, int]:  
+        """获取显存统计信息"""  
+        return {  
+            "allocated": torch.cuda.memory_allocated() - self.base_mem,  
+            "peak": torch.cuda.max_memory_allocated() - self.base_mem,  
+            "model_params": sum(p.element_size() * p.nelement()   
+                              for p in self.model.parameters()),  
+            "gradients": sum(p.grad.element_size() * p.grad.nelement()   
+                           for p in self.model.parameters()   
+                           if p.grad is not None),  
+        }  
+
+    def _get_grad_stats(self) -> Dict[str, float]:  
+        """获取梯度统计信息"""  
+        grads = []  
+        for param in self.model.parameters():  
+            if param.grad is not None:  
+                grads.append(param.grad.detach().cpu().view(-1))  
+        
+        if not grads:  
+            return {}  
+            
+        all_grads = torch.cat(grads)  
+        return {  
+            "norm": all_grads.norm().item(),  
+            "mean": all_grads.mean().item(),  
+            "std": all_grads.std().item(),  
+            "nan_count": torch.isnan(all_grads).sum().item(),  
+            "inf_count": torch.isinf(all_grads).sum().item(),  
+        }  
+
+    def plot_metrics(self, save_path: str = "training_metrics.png"):  
+        """生成训练指标可视化图表"""  
+        plt.figure(figsize=(18, 12))  
+        
+        # Loss曲线  
+        plt.subplot(2, 3, 1)  
+        losses = [r['loss'] for r in self.history if r['loss']]  
+        plt.plot(losses, label='Training Loss')  
+        plt.title("Loss Curve")  
+        plt.xlabel("Step")  
+        plt.legend()  
+
+        # 学习率变化  
+        plt.subplot(2, 3, 2)  
+        lrs = [r['learning_rate'] for r in self.history]  
+        plt.plot(lrs, color='orange')  
+        plt.title("Learning Rate Schedule")  
+        plt.xlabel("Step")  
+
+        # 显存使用  
+        plt.subplot(2, 3, 3)  
+        mem_alloc = [r['memory']['allocated']/1e9 for r in self.history]  
+        mem_peak = [r['memory']['peak']/1e9 for r in self.history]  
+        plt.plot(mem_alloc, label='Current Memory')  
+        plt.plot(mem_peak, label='Peak Memory')  
+        plt.title("GPU Memory Usage (GB)")  
+        plt.legend()  
+
+        # 梯度统计  
+        plt.subplot(2, 3, 4)  
+        grad_norms = [r['grad_stats']['norm']/1e6 for r in self.history   
+                     if 'norm' in r['grad_stats']]  
+        plt.plot(grad_norms, color='green')  
+        plt.title("Gradient Norm (M)")  
+
+        # 优化器状态内存  
+        plt.subplot(2, 3, 5)  
+        state_names = list(self.history[0]['optimizer_states'].keys())  
+        for state in state_names:  
+            state_mem = [r['optimizer_states'][state]/1e6 for r in self.history]  
+            plt.plot(state_mem, label=state)  
+        plt.title("Optimizer States Memory (MB)")  
+        plt.legend()  
+
+        # 参数梯度分布  
+        plt.subplot(2, 3, 6)  
+        param_types = ['embeddings', 'attention', 'feed_forward']  
+        for pt in param_types:  
+            norms = [n[-1] if n else 0   
+                    for n in self.gradient_norms.values() if pt in n]  
+            plt.hist(norms, bins=50, alpha=0.5, label=pt)  
+        plt.yscale('log')  
+        plt.title("Gradient Distribution by Layer Type")  
+        plt.legend()  
+
+        plt.tight_layout()  
+        plt.savefig(save_path)  
+        plt.close()  
+
+    def generate_report(self) -> str:  
+        """生成训练分析报告"""  
+        last = self.history[-1]  
+        report = [  
+            "===== Training Analysis Report =====",  
+            f"Total Steps: {len(self.history)}",  
+            f"Total Time: {last['timestamp']:.2f}s",  
+            f"Final Loss: {last['loss']:.4f}",  
+            f"Peak GPU Memory: {last['memory']['peak']/1e9:.2f} GB",  
+            f"Final Gradient Norm: {last['grad_stats']['norm']/1e6:.2f} M",  
+            "\n--- Memory Breakdown ---",  
+            f"Model Parameters: {last['memory']['model_params']/1e9:.2f} GB",  
+            f"Gradients: {last['memory']['gradients']/1e9:.2f} GB",  
+            f"Optimizer States: {sum(last['optimizer_states'].values())/1e9:.2f} GB"  
+        ]  
+        return "\n".join(report) 
+    
+    
+
+
+# 示例用法（与Hugging Face Trainer集成）  
+def test_pytorch_optimizer():  
+    from transformers import Trainer, TrainingArguments  
+    
+    class MonitoringTrainer(Trainer):  
+        def __init__(self, *args, **kwargs):  
+            super().__init__(*args, **kwargs)  
+            self.monitor = None  
+            
+        def training_step(self, model, inputs):  
+            loss = super().training_step(model, inputs)  
+            if self.monitor is None:  
+                self.monitor = TorchOptimizerMonitor(model, self.optimizer)  
+            self.monitor.record(loss)  
+            return loss  
+    
+    # 在训练参数中配置  
+    training_args = TrainingArguments(  
+        output_dir='./output',  
+        per_device_train_batch_size=8,  
+        logging_steps=50,  
+    )  
+    
+    model = TestModelForCausalLM()
+    
+    # dataset = get_qa_dataloader()
+    dataset = get_qa_dataset()
+    # 使用自定义Trainer  
+    trainer = MonitoringTrainer(  
+        model=model,  
+        args=training_args,  
+        train_dataset=dataset,  
+    )  
+    
+    # 开始训练  
+    trainer.train()  
+    
+    # 生成报告和图表  
+    trainer.monitor.plot_metrics()  
+    print(trainer.monitor.generate_report())  
+    
+    
+    
+
+
+
+
+def test_my_optimizer():
+    
     # 示例模型和优化器  
     model = torch.nn.Linear(10, 2).cuda()  
     opt = torch.optim.Adam(model.parameters())  
@@ -175,4 +406,11 @@ if __name__ == "__main__":
     
     # 保存报告
     # with open("training_report.txt", "w") as f:  
-    #     f.write(monitor.generate_report())  
+    #     f.write(monitor.generate_report()) 
+    
+    
+
+
+if __name__ == "__main__":
+    # test_my_optimizer()
+    test_pytorch_optimizer()

@@ -3,7 +3,9 @@ reproduce Adam with pytorch
 
 - We have implemented `Adam`, `AdamW`, `Adafactor` optimizers in this project. You can check the running result in the `examples` folder.
 
-- we implemented an `OptimizerMonitor` in the `utils.py` file, which can monitor the training process of the model, the GPU memory occupation of the first and second momentum, the gradient and weights and other variables. We also record the gradient growing tendency using the matplotlib. 
+- we implemented an `OptimizerMonitor` and `OptimizerMonitor` in the `utils.py` file, which can monitor the training process of the model, the GPU memory occupation of the first and second momentum, the gradient and weights and other variables. We also record the gradient growing tendency using the matplotlib. 
+
+- we defined a `TestModel` and `TestModelForCausalLM` in the `models.py` file, which can be used to test the optimizer. This Model is a simulation of a AutoModelForCausalLM, which has its basic features.
 
 
 ## Adam
@@ -199,13 +201,14 @@ v_t = β2*v_{t-1} + (1-β2)*g_t²
 
 ### **1. 内存效率优化（核心优势）**
 **Adam的缺陷**：
-- 需要存储每个参数的完整二阶动量矩阵（v）
-- 参数数量为N时，内存占用为 **2N**（m + v）
+- Adam需要存储每个参数的完整二阶动量矩阵 (v)
+- 当模型的参数数量为N时，内存占用为 **2N** (m + v)
 
 **Adafactor改进**：
-- 使用**低秩分解**近似二阶动量矩阵：`v ≈ R * C`（行向量R和列向量C）
-- 内存占用降为 **N + (d1 + d2)**（参数矩阵维度d1×d2时）
+- 使用**低秩分解**来近似二阶动量矩阵：`v ≈ R * C` (行向量R和列向量C)
+- 内存占用降为 **N + (d1 + d2)** (参数矩阵维度d1×d2时)
 - 实际节省示例：
+- 
   ```python
   # 参数矩阵形状为(4096, 8192)的注意力层
   Adam内存 = 4096*8192*2 = 67,108,864 浮点数
@@ -334,6 +337,11 @@ python adam.py
 python utils.py  # monitor the training process
 ```
 
+- Test the `TestModelForCausalLM` and `TestModel` in the `models.py` file. and see the impact of the `OptimizerMonitor`
+
+```bash
+python main.py
+```
 
 
 
@@ -356,3 +364,7 @@ python utils.py  # monitor the training process
 
 - Optimizer Monitoring
 ![monitor](examples/optimizer_trends.png)
+
+
+- Torch Optimizer Monitoring
+- I meet `Cuda Out of Memory` error after the first epoch (when calculating the average gradient), however, the entire working flow is fluent.

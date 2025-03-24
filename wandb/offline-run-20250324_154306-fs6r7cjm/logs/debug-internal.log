@@ -1,0 +1,14 @@
+{"time":"2025-03-24T15:43:07.739468+08:00","level":"INFO","msg":"stream: starting","core version":"0.19.4","symlink path":"D:\\ai-code\\adam-optimizer-pytorch\\wandb\\offline-run-20250324_154306-fs6r7cjm\\logs\\debug-core.log"}
+{"time":"2025-03-24T15:43:07.9242412+08:00","level":"INFO","msg":"created new stream","id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:07.9248788+08:00","level":"INFO","msg":"handler: started","stream_id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:07.9248788+08:00","level":"INFO","msg":"stream: started","id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:07.9248788+08:00","level":"INFO","msg":"sender: started","stream_id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:07.9248788+08:00","level":"INFO","msg":"writer: Do: started","stream_id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:07.9341602+08:00","level":"INFO","msg":"Starting system monitor"}
+{"time":"2025-03-24T15:43:16.1632187+08:00","level":"INFO","msg":"stream: closing","id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:16.1656331+08:00","level":"INFO","msg":"Stopping system monitor"}
+{"time":"2025-03-24T15:43:16.1690246+08:00","level":"INFO","msg":"Stopped system monitor"}
+{"time":"2025-03-24T15:43:16.1699424+08:00","level":"INFO","msg":"handler: closed","stream_id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:16.1699424+08:00","level":"INFO","msg":"writer: Close: closed","stream_id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:16.1699424+08:00","level":"INFO","msg":"sender: closed","stream_id":"fs6r7cjm"}
+{"time":"2025-03-24T15:43:16.1724796+08:00","level":"INFO","msg":"stream: closed","id":"fs6r7cjm"}
